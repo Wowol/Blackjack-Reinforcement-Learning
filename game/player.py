@@ -1,7 +1,5 @@
 from random import randint
-from card import Card
-from dealer import Dealer
-
+from .card import Card
 
 class Player:
     sum = 0

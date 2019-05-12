@@ -1,22 +1,29 @@
-import consts
-from action import Action
-from player import Player
-from dealer import Dealer
-from state import State
+from game.dealer import Dealer
+from game.player import Player
+import numpy as np
+from statistics import mean
+from utils.state import State, states
+from .agent import Agent
+from game.action import Action
 import random
 
-from statistics import mean
-import numpy as np
 
-
-class MonteCarloExploringStarts:
+class MonteCarloExploringStarts(Agent):
 
     policy = {k: Action.STAND if k.player_sum >=
-              19 else Action.HIT for k in consts.states}
-    returns = {(k, a): [] for k in consts.states for a in list(Action)}
-    Q = {k: {} for k in consts.states}
+              19 else Action.HIT for k in states}
+    returns = {(k, a): [] for k in states for a in list(Action)}
+    Q = {k: {} for k in states}
 
     def calculate(self, number=1000000):
+        """Estimate many times
+
+        Keyword Arguments:
+            number {int} -- Number of times to estimate (default: {1000000})
+
+        Returns:
+            Dictionary -- Estimated policy
+        """
         for i in range(0, number):
             self.estimate_one()
         return self.policy
@@ -39,8 +46,7 @@ class MonteCarloExploringStarts:
         """
         player = Player()
         dealer = Dealer()
-        # State(player.sum, player.usable_ace, dealer.sum)
-        current_state = random.choice(consts.states)
+        current_state = random.choice(states)
         current_action = random.choice(list(Action))
 
         player.sum = current_state.player_sum

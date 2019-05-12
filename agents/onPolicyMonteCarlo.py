@@ -1,22 +1,22 @@
+from game.dealer import Dealer
+from game.player import Player
 import numpy as np
 from statistics import mean
+from utils.state import State, states
+from .agent import Agent
+from game.action import Action
 import random
-from state import State
-from dealer import Dealer
-from player import Player
-from action import Action
-import consts
 
 
-class OnPolicyMonteCarlo:
-    policy = {k: {} for k in consts.states}
-    returns = {(k, a): [] for k in consts.states for a in list(Action)}
-    Q = {k: {} for k in consts.states}
+class OnPolicyMonteCarlo(Agent):
+    policy = {k: {} for k in states}
+    returns = {(k, a): [] for k in states for a in list(Action)}
+    Q = {k: {} for k in states}
 
-    EPSILON = 0.1
+    def __init__(self, epsilon=0.1):
+        self.EPSILON = epsilon
 
-    def __init__(self):
-        for k in consts.states:
+        for k in states:
             last = 1
             for a in list(Action):
                 self.policy[k][a] = random.random() if last == 1 else 1 - last
@@ -28,6 +28,14 @@ class OnPolicyMonteCarlo:
         return max(from_where[state], key=from_where[state].get)
 
     def calculate(self, number=10000):
+        """Estimate many times
+
+        Keyword Arguments:
+            number {int} -- Number of times to estimate (default: {1000000})
+
+        Returns:
+            Dictionary -- Estimated policy
+        """
         for i in range(0, number):
             self.estimate_one()
 
@@ -71,7 +79,7 @@ class OnPolicyMonteCarlo:
         """
         player = Player()
         dealer = Dealer()
-        current_state = random.choice(consts.states)
+        current_state = random.choice(states)
         current_action = self.get_action(current_state)
 
         player.sum = current_state.player_sum

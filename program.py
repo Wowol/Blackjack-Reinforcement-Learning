@@ -1,9 +1,9 @@
-from player import Player
-from dealer import Dealer
-from state import State
-from action import Action
-from MonteCarloExploringStarts import MonteCarloExploringStarts
-from OnPolicyMonteCarlo import OnPolicyMonteCarlo
+from utils.state import State, states
+from game.player import Player
+from game.dealer import Dealer
+from game.action import Action
+from agents.monteCarloExploringStarts import MonteCarloExploringStarts
+from agents.onPolicyMonteCarlo import OnPolicyMonteCarlo
 
 
 def play(policy, win=1, tie=0, lose=-1):
@@ -46,8 +46,8 @@ def play_many_times(policy, times=10000):
     return times_won / all * 100
 
 
-agent = OnPolicyMonteCarlo()
-policy = agent.calculate(100000)
+agent = OnPolicyMonteCarlo(0.1)
+policy = agent.calculate(1000)
 for state, action in policy.items():
     print(state.dealer_card, state.player_sum, state.player_usable_ace, action)
 
