@@ -18,7 +18,7 @@ class MonteCarloExploringStarts(Agent):
     DELTA = 0.05
     TIMES_TESTED_SAME_STATE = 1000
 
-    def __init__(self, improve = True):
+    def __init__(self, improve = True, *_, **__):
         self.IMPROVE = improve
 
     def calculate(self, number=1000000):

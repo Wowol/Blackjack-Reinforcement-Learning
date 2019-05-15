@@ -17,7 +17,7 @@ class Sarsa(Agent):
     DELTA = 0.1
     TIMES_TESTED_SAME_STATE = 1000
 
-    def __init__(self, alpha=0.1, epsilon=0.2, improve=True):
+    def __init__(self, epsilon=0.2, alpha=0.1, improve=True,  *_, **__):
         self.ALPHA = alpha
         self.EPSILON = epsilon
         self.IMPROVE = improve

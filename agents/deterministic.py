@@ -5,6 +5,9 @@ from .agent import Agent
 
 class Deterministic(Agent):
 
+    def __init__(self,  *_, **__):
+        pass
+
     def calculate(self, _=0):
         policy = {}
         for s in states:

@@ -17,7 +17,7 @@ class OnPolicyMonteCarlo(Agent):
     TIMES_TESTED_SAME_STATE = 1000
 
 
-    def __init__(self, epsilon=0.2, improve = True):
+    def __init__(self, epsilon=0.2, improve = True,  *_, **__):
         self.IMPROVE = improve
         self.EPSILON = epsilon
 
@@ -46,7 +46,6 @@ class OnPolicyMonteCarlo(Agent):
         if self.IMPROVE:
             for k, v in self.Q.items():
                 if abs(v[Action.HIT] - v[Action.STAND]) < self.DELTA:
-                    print("testing for ", k)
                     for i in range(0, self.TIMES_TESTED_SAME_STATE):
                         self.estimate_one(k)
 

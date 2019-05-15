@@ -7,73 +7,45 @@ from agents.onPolicyMonteCarlo import OnPolicyMonteCarlo
 from agents.qLearning import QLearning
 from agents.deterministic import Deterministic
 from agents.sarsa import Sarsa
+from utils.tests import *
+import argparse
+import sys
+import time
 
 
-def play(policy, win=1, tie=0, lose=-1):
-    player = Player()
-    dealer = Dealer()
+algos = {"deterministic": Deterministic, "monteCarloExploringStarts": MonteCarloExploringStarts,
+         "onPolicyMonteCarlo": OnPolicyMonteCarlo, "qlearning": QLearning, "sarsa": Sarsa}
 
-    state = State(player.sum, player.usable_ace, dealer.sum)
-    current_action = policy[state]
+parser = argparse.ArgumentParser(
+    description='Blackjack reinforcement learning')
+parser.add_argument('-n', '--number', type=int, default=10000,
+                    help='Number of times to repeat algorithms')
+parser.add_argument('-e', '--epsilon', type=int, default=0.2,
+                    help='Epsilon value for algorithms')
+parser.add_argument('-a', '--alpha', type=int, default=0.02,
+                    help='Alpha')
+parser.add_argument('-i', '--improve', type=bool, default=True,
+                    help='Try to improve results by repeat to learn starting with states with nearly expected reward')
+parser.add_argument('algorithm', type=str, help='Algorithm to learn (' +
+                    ', '.join([name for name in algos.keys()]) + ')')
+args = parser.parse_args()
 
-    while True:
-        if current_action == Action.HIT:
-            player.hit()
-            if player.sum > 21:
-                return lose
-                break
-            else:
-                current_state = State(
-                    player.sum, player.usable_ace, dealer.sum)
-                current_action = policy[current_state]
-        else:
-            dealer.play_to_end()
-            if dealer.sum > 21 or dealer.sum < player.sum:
-                return win
-            elif dealer.sum == player.sum:
-                return tie
-            else:
-                return lose
-            break
-
-
-def play_many_times(policy, times=30000):
-    times_won = 0
-    all = 0
-    for i in range(0, times):
-        result = play(policy)
-        if result != 0:
-            all += 1
-        if result == 1:
-            times_won += 1
-    return times_won / all * 100
-
-
-def print_differences(first_policy, second_policy):
-    number = 0
-    for k, v in first_policy.items():
-        if second_policy[k] != v:
-            number += 1
-            print(k)
-            print("FIRST POLICY: ", v)
-            print("SECOND POLICY: ", second_policy[k])
-            print()
-
-    print("Number of diffrences: ", number)
-    return number
-
+algo = None
+for name, cls in algos.items():
+    if name.lower().startswith(args.algorithm.lower()):
+        algo = cls
+if algo is None:
+    parser.print_help()
+    sys.exit(1)
 
 deterministic_agent = Deterministic()
-agent = MonteCarloExploringStarts()
-agent = OnPolicyMonteCarlo(0.2)
-agent = Sarsa(0.02, 0.2, True)
-agent = QLearning(0.02, 0.2, True)
-policy = agent.calculate(100000)
+
+
+agent = algo(epsilon=args.epsilon, alpha=args.alpha, improve=args.improve)
+
+start_time = time.time()
+policy = agent.calculate(args.number)
+elapsed_time = print("TIME: ", time.time() - start_time)
 
 print_differences(deterministic_agent.calculate(), policy)
-
-# for state, action in policy.items():
-#     print(state.dealer_card, state.player_sum, state.player_usable_ace, action)
-
-
-print(play_many_times(policy))
+print(play_many_times(policy, times=1000000))
