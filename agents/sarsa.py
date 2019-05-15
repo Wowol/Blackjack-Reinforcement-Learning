@@ -35,10 +35,7 @@ class Sarsa(Agent):
         return self.policy
 
     def get_best_action(self, state, from_where=None):
-        if from_where is None:
-            from_where = self.Q
         return max(self.Q[state], key=self.Q[state].get)
-
 
     def estimate_one(self):
         episode, reward = self.generate_episode()
@@ -52,14 +49,14 @@ class Sarsa(Agent):
             # print(self.Q[current_state][current_action])
             # print(self.Q[next_state][next_action])
 
-            diff = self.Q[current_state][current_action] - \
-                self.Q[next_state][next_action]
+            diff = self.Q[next_state][next_action] - \
+                self.Q[current_state][current_action]
 
             self.Q[current_state][current_action] += self.ALPHA*((reward if i == len(episode) - 2 else 0) +
                                                                  diff)
 
         for state, _ in episode:
-            self.policy[state] = max(self.Q[state], key=self.Q[state].get)
+            self.policy[state] = self.get_best_action(state)
 
     def generate_episode(self):
         """Generate episode using current policy
