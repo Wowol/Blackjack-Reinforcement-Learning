@@ -18,6 +18,9 @@ class MonteCarloExploringStarts(Agent):
     DELTA = 0.05
     TIMES_TESTED_SAME_STATE = 1000
 
+    def __init__(self, improve = True):
+        self.IMPROVE = improve
+
     def calculate(self, number=1000000):
         """Estimate many times
 
@@ -30,17 +33,11 @@ class MonteCarloExploringStarts(Agent):
         for i in range(0, number):
             self.estimate_one()
 
-        # print("{" + "\n".join("{}: {}".format(k, v)
-        #                       for k, v in self.Q.items()) + "}")
-
-        for k, v in self.Q.items():
-            if abs(v[Action.HIT] - v[Action.STAND]) < self.DELTA:
-                print("testing for ", k)
-                for i in range(0, self.TIMES_TESTED_SAME_STATE):
-                    self.estimate_one(k)
-
-        # print("{" + "\n".join("{}: {}".format(k, v)
-        #                       for k, v in self.Q.items()) + "}")
+        if self.IMPROVE:
+            for k, v in self.Q.items():
+                if abs(v[Action.HIT] - v[Action.STAND]) < self.DELTA:
+                    for i in range(0, self.TIMES_TESTED_SAME_STATE):
+                        self.estimate_one(k)
 
         return self.policy
 
