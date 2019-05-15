@@ -63,11 +63,11 @@ def print_differences(first_policy, second_policy):
 
 # Biore najlepsza akcje z duzym prawodpdobosniewm
 deterministic_agent = Deterministic()
-# agent = MonteCarloExploringStarts()
+agent = MonteCarloExploringStarts()
 # agent = OnPolicyMonteCarlo(0.2)
-agent = Sarsa()
+# agent = Sarsa(0.02)
 # agent =  Deterministic()# Sarsa()#OnPolicyMonteCarlo(0.1)
-policy = agent.calculate(15000)
+policy = agent.calculate(100000)
 
 print_differences(deterministic_agent.calculate(), policy)
 

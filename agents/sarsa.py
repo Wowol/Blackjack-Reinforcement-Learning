@@ -10,16 +10,21 @@ import random
 
 class Sarsa(Agent):
 
-    policy = {k: Action.STAND if k.player_sum >=
-              19 else Action.HIT for k in states}
+    policy = {k: {} for k in states}
+    # policy = {k: Action.STAND if k.player_sum >=
+    #           19 else Action.HIT for k in states}
     returns = {(k, a): [] for k in states for a in list(Action)}
     Q = {k: {} for k in states}
-    ALPHA = 0.1
 
-    def __init__(self):
+    def __init__(self, alpha=0.1, epsilon=0.2):
+        self.ALPHA = alpha
+        self.EPSILON = epsilon
         for k in states:
+            last = 1
             for a in list(Action):
-                self.Q[k][a] = 0.0
+                self.Q[k][a] = 0
+                self.policy[k][a] = random.random() if last == 1 else 1 - last
+                last = self.policy[k][a]
 
     def calculate(self, number=1000000):
         """Estimate many times
@@ -32,14 +37,21 @@ class Sarsa(Agent):
         """
         for i in range(0, number):
             self.estimate_one()
-        return self.policy
+        print("{" + "\n".join("{}: {}".format(k, v)
+                              for k, v in self.Q.items()) + "}")
+        return_policy = {}
+        for state in self.policy.keys():
+            best_action = self.get_best_action(state)
+            return_policy[state] = best_action
+
+        return return_policy
 
     def get_best_action(self, state, from_where=None):
         return max(self.Q[state], key=self.Q[state].get)
 
     def estimate_one(self):
         episode, reward = self.generate_episode()
-        for i in range(0, len(episode)-1):
+        for i in range(0, len(episode) - 1):
             current_state = episode[i][0]
             current_action = episode[i][1]
 
@@ -52,11 +64,31 @@ class Sarsa(Agent):
             diff = self.Q[next_state][next_action] - \
                 self.Q[current_state][current_action]
 
-            self.Q[current_state][current_action] += self.ALPHA*((reward if i == len(episode) - 2 else 0) +
-                                                                 diff)
+            self.Q[current_state][current_action] += self.ALPHA*diff
+
+        self.Q[episode[len(episode)-1][0]][episode[len(episode)-1][1]] += self.ALPHA*(
+            reward - self.Q[episode[len(episode)-1][0]][episode[len(episode)-1][1]])
 
         for state, _ in episode:
-            self.policy[state] = self.get_best_action(state)
+            best_action = self.get_best_action(state)
+            for action in list(Action):
+                if action == best_action:
+                    self.policy[state][action] = 1 - \
+                        self.EPSILON + (self.EPSILON / len(list(Action)))
+                else:
+                    self.policy[state][action] = self.EPSILON / \
+                        len(list(Action))
+
+        # for state, _ in episode:
+        #     self.policy[state] = self.get_best_action(state)
+
+    def get_action(self, state):
+        action_with_probabilities = self.policy[state]
+        actions = list(action_with_probabilities.keys())
+        probabilities = list(action_with_probabilities.values())
+
+        current_action = np.random.choice(a=actions, size=1, p=probabilities)
+        return current_action[0]
 
     def generate_episode(self):
         """Generate episode using current policy
@@ -69,7 +101,7 @@ class Sarsa(Agent):
         dealer = Dealer()
 
         current_state = random.choice(states)
-        current_action = self.get_best_action(current_state)
+        current_action = self.get_action(current_state)
 
         player.sum = current_state.player_sum
         player.usable_ace = current_state.player_usable_ace
@@ -87,7 +119,7 @@ class Sarsa(Agent):
                 else:
                     current_state = State(
                         player.sum, player.usable_ace, dealer.sum)
-                    current_action = self.policy[current_state]
+                    current_action = self.get_action(current_state)
                     episode.append((current_state, current_action))
             else:
                 dealer.play_to_end()

@@ -15,6 +15,9 @@ class MonteCarloExploringStarts(Agent):
     returns = {(k, a): [] for k in states for a in list(Action)}
     Q = {k: {} for k in states}
 
+    DELTA = 0.05
+    TIMES_TESTED_SAME_STATE = 1000
+
     def calculate(self, number=1000000):
         """Estimate many times
 
@@ -26,10 +29,23 @@ class MonteCarloExploringStarts(Agent):
         """
         for i in range(0, number):
             self.estimate_one()
+
+        # print("{" + "\n".join("{}: {}".format(k, v)
+        #                       for k, v in self.Q.items()) + "}")
+
+        for k, v in self.Q.items():
+            if abs(v[Action.HIT] - v[Action.STAND]) < self.DELTA:
+                print("testing for ", k)
+                for i in range(0, self.TIMES_TESTED_SAME_STATE):
+                    self.estimate_one(k)
+
+        # print("{" + "\n".join("{}: {}".format(k, v)
+        #                       for k, v in self.Q.items()) + "}")
+
         return self.policy
 
-    def estimate_one(self):
-        episode, reward = self.generate_episode()
+    def estimate_one(self, starting_state=None):
+        episode, reward = self.generate_episode(starting_state)
         for state, action in episode:
             self.returns[(state, action)].append(reward)
             self.Q[state][action] = mean(self.returns[(state, action)])
@@ -37,7 +53,7 @@ class MonteCarloExploringStarts(Agent):
         for state, _ in episode:
             self.policy[state] = max(self.Q[state], key=self.Q[state].get)
 
-    def generate_episode(self):
+    def generate_episode(self, starting_state=None):
         """Generate episode using current policy
 
         Returns:
@@ -46,7 +62,8 @@ class MonteCarloExploringStarts(Agent):
         """
         player = Player()
         dealer = Dealer()
-        current_state = random.choice(states)
+        current_state = starting_state if starting_state is not None else random.choice(
+            states)
         current_action = random.choice(list(Action))
 
         player.sum = current_state.player_sum
