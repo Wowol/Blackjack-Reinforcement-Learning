@@ -4,7 +4,7 @@ from game.dealer import Dealer
 from game.action import Action
 from agents.monteCarloExploringStarts import MonteCarloExploringStarts
 from agents.onPolicyMonteCarlo import OnPolicyMonteCarlo
-
+from agents.sarsa import Sarsa
 
 def play(policy, win=1, tie=0, lose=-1):
     player = Player()
@@ -45,9 +45,9 @@ def play_many_times(policy, times=10000):
             times_won += 1
     return times_won / all * 100
 
-
-agent = OnPolicyMonteCarlo(0.1)
-policy = agent.calculate(1000)
+# Biore najlepsza akcje z duzym prawodpdobosniewm
+agent = Sarsa()#OnPolicyMonteCarlo(0.1)
+policy = agent.calculate(100000)
 for state, action in policy.items():
     print(state.dealer_card, state.player_sum, state.player_usable_ace, action)
 
