@@ -13,19 +13,18 @@ class OnPolicyMonteCarlo(Agent):
     returns = {(k, a): [] for k in states for a in list(Action)}
     Q = {k: {} for k in states}
 
-    def __init__(self, epsilon=0.1):
+    def __init__(self, epsilon=0.2):
         self.EPSILON = epsilon
 
         for k in states:
             last = 1
             for a in list(Action):
+                self.Q[k][a] = 0
                 self.policy[k][a] = random.random() if last == 1 else 1 - last
                 last = self.policy[k][a]
 
-    def get_best_action(self, state, from_where=None):
-        if from_where is None:
-            from_where = self.Q
-        return max(from_where[state], key=from_where[state].get)
+    def get_best_action(self, state):
+        return max(self.Q[state], key=self.Q[state].get)
 
     def calculate(self, number=10000):
         """Estimate many times
@@ -41,7 +40,7 @@ class OnPolicyMonteCarlo(Agent):
 
         return_policy = {}
         for state in self.policy.keys():
-            best_action = self.get_best_action(state, self.policy)
+            best_action = self.get_best_action(state)
             return_policy[state] = best_action
 
         return return_policy
@@ -57,7 +56,7 @@ class OnPolicyMonteCarlo(Agent):
             for action in list(Action):
                 if action == best_action:
                     self.policy[state][action] = 1 - \
-                        self.EPSILON + self.EPSILON / len(list(Action))
+                        self.EPSILON + (self.EPSILON / len(list(Action)))
                 else:
                     self.policy[state][action] = self.EPSILON / \
                         len(list(Action))
@@ -67,8 +66,8 @@ class OnPolicyMonteCarlo(Agent):
         actions = list(action_with_probabilities.keys())
         probabilities = list(action_with_probabilities.values())
 
-        current_action = np.random.choice(actions, 1, probabilities)[0]
-        return current_action
+        current_action = np.random.choice(a=actions, size=1, p=probabilities)
+        return current_action[0]
 
     def generate_episode(self):
         """Generate episode using current policy
@@ -98,7 +97,7 @@ class OnPolicyMonteCarlo(Agent):
                 else:
                     current_state = State(
                         player.sum, player.usable_ace, dealer.sum)
-                    current_action = self.get_action(current_state)
+                    current_action = self.get_action(current_state)#self.get_best_action(current_state)#
                     episode.append((current_state, current_action))
             else:
                 dealer.play_to_end()

@@ -25,6 +25,9 @@ class State:
     def __ne__(self, other):
         return not(self == other)
 
+    def __repr__(self):
+        return f"{self.dealer_card} {self.player_sum} {self.player_usable_ace}"
+
 
 states = []
 
