@@ -11,8 +11,6 @@ import random
 class Sarsa(Agent):
 
     policy = {k: {} for k in states}
-    # policy = {k: Action.STAND if k.player_sum >=
-    #           19 else Action.HIT for k in states}
     returns = {(k, a): [] for k in states for a in list(Action)}
     Q = {k: {} for k in states}
 
@@ -42,8 +40,6 @@ class Sarsa(Agent):
         """
         for i in range(0, number):
             self.estimate_one()
-        # print("{" + "\n".join("{}: {}".format(k, v)
-        #                       for k, v in self.Q.items()) + "}")
 
         if self.IMPROVE:
             for k, v in self.Q.items():
@@ -70,9 +66,6 @@ class Sarsa(Agent):
             next_state = episode[i+1][0]
             next_action = episode[i+1][1]
 
-            # print(self.Q[current_state][current_action])
-            # print(self.Q[next_state][next_action])
-
             diff = self.Q[next_state][next_action] - \
                 self.Q[current_state][current_action]
 
@@ -90,9 +83,6 @@ class Sarsa(Agent):
                 else:
                     self.policy[state][action] = self.EPSILON / \
                         len(list(Action))
-
-        # for state, _ in episode:
-        #     self.policy[state] = self.get_best_action(state)
 
     def get_action(self, state):
         action_with_probabilities = self.policy[state]

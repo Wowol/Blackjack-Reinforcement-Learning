@@ -111,7 +111,7 @@ class OnPolicyMonteCarlo(Agent):
                 else:
                     current_state = State(
                         player.sum, player.usable_ace, dealer.sum)
-                    current_action = self.get_action(current_state)#self.get_best_action(current_state)#
+                    current_action = self.get_action(current_state)
                     episode.append((current_state, current_action))
             else:
                 dealer.play_to_end()
@@ -124,7 +124,3 @@ class OnPolicyMonteCarlo(Agent):
                 break
 
         return episode, reward
-
-
-# agent = OnPolicyMonteCarlo()
-# agent.calculate()
